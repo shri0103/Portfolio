@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Heroic Career Path Assembler v2</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Roboto+Condensed:wght@400;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* --- Basic Styling & NEW Animated Background --- */
+        body {
+            font-family: 'Roboto Condensed', sans-serif;
+            background-color: #1a232f; /* Dark blue background */
+            background-image: 
+                radial-gradient(circle at 20% 20%, rgba(44, 62, 80, 0.5) 0%, transparent 40%),
+                radial-gradient(circle at 80% 70%, rgba(230, 36, 41, 0.2) 0%, transparent 30%);
+            color: #f0f2f5;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden; /* Hide overflow for background effect */
+            perspective: 1000px; /* NEW: Create a 3D space for children */
+        }
+        
+        /* NEW: Particle background effect */
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background-image: 
+                radial-gradient(4px 4px at 30% 70%, #fff, transparent),
+                radial-gradient(6px 6px at 40% 30%, #fff, transparent),
+                radial-gradient(3px 3px at 80% 20%, #fff, transparent);
+            background-repeat: repeat;
+            background-size: 500px 500px;
+            animation: move-particles 30s linear infinite;
+            opacity: 0.1;
+            z-index: -1;
+        }
+
+        @keyframes move-particles {
+            from { transform: translate(0, 0); }
+            to { transform: translate(-500px, -500px); }
+        }
+
+        /* --- Main Container (NOW with 3D styles) --- */
+        #explorer-container {
+            width: 100%;
+            max-width: 800px;
+            background-color: rgba(44, 62, 80, 0.8);
+            border: 2px solid #8a9eb2;
+            border-radius: 15px;
+            box-shadow: 0 0 30px rgba(0, 191, 255, 0.3), inset 0 0 20px rgba(0, 0, 0, 0.6);
+            padding: 30px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            /* NEW: 3D transformation properties */
+            transform-style: preserve-3d;
+            transition: transform 0.1s ease-out;
+        }
+
+        h1 {
+            font-family: 'Bangers', cursive;
+            color: #e62429; /* Marvel Red */
+            font-size: 3.5em;
+            letter-spacing: 2px;
+            margin-bottom: 20px;
+            /* NEW: More pronounced shadow and glow animation */
+            text-shadow: 
+                0 0 5px #ff4b4b,
+                0 0 10px #ff4b4b,
+                2px 2px 4px #000;
+            animation: title-glow 4s infinite alternate;
+        }
+
+        @keyframes title-glow {
+            from { text-shadow: 0 0 5px #ff4b4b, 0 0 10px #ff4b4b, 2px 2px 4px #000; }
+            to { text-shadow: 0 0 10px #e62429, 0 0 20px #e62429, 2px 2px 4px #000; }
+        }
+
+        /* --- Path Display --- */
+        #path-display {
+            font-size: 1.2em;
+            color: #fff;
+            margin-bottom: 25px;
+            padding: 10px 15px;
+            background-color: rgba(0, 0, 0, 0.4);
+            border-radius: 8px;
+            min-height: 25px;
+            font-weight: 700;
+            border-left: 5px solid #e62429;
+            transition: all 0.3s ease;
+        }
+        
+        /* --- Details Box (NEW look and transitions) --- */
+        #details-box {
+            text-align: left;
+            padding: 20px;
+            border: 1px solid #4f5b66;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            min-height: 100px;
+            line-height: 1.6;
+            background-color: rgba(0, 0, 0, 0.3);
+            position: relative; /* For pseudo-elements */
+            /* NEW: Transition for smooth content fade */
+            transition: opacity 0.4s ease, transform 0.4s ease;
+        }
+
+        /* NEW: HUD-style corner brackets */
+        #details-box::before, #details-box::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border-color: #f1c40f;
+            border-style: solid;
+            opacity: 0.7;
+        }
+        #details-box::before {
+            top: 10px; left: 10px;
+            border-width: 2px 0 0 2px;
+        }
+        #details-box::after {
+            bottom: 10px; right: 10px;
+            border-width: 0 2px 2px 0;
+        }
+
+        /* NEW: Classes to control content fade */
+        .content-hidden {
+            opacity: 0;
+            transform: scale(0.98);
+        }
+
+        #details-box h2 {
+            margin-top: 0;
+            font-family: 'Bangers', cursive;
+            font-size: 2em;
+            letter-spacing: 1px;
+            color: #f1c40f; /* Gold accent */
+        }
+
+        /* --- Options Container for Buttons --- */
+        #options-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+            /* NEW: Transition for smooth button appearance */
+            transition: opacity 0.4s ease 0.2s; 
+        }
+
+        /* --- Buttons (NEW 3D hover and active effects) --- */
+        .career-option, #back-btn {
+            background: linear-gradient(145deg, #e62429, #b31217);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 5px;
+            font-size: 1.1em;
+            font-family: 'Roboto Condensed', sans-serif;
+            font-weight: 700;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.2s ease-out;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+            /* NEW: Prepare for 3D transforms */
+            transform: translateZ(20px); 
+        }
+
+        .career-option:hover {
+            background: linear-gradient(145deg, #ff4b4b, #e62429);
+            /* NEW: More dynamic 3D hover effect */
+            transform: translateY(-5px) translateZ(30px) scale(1.05);
+            box-shadow: 0 8px 25px rgba(255, 75, 75, 0.4);
+        }
+
+        /* NEW: Satisfying press-in effect */
+        .career-option:active, #back-btn:active {
+            transform: translateY(1px) translateZ(15px) scale(0.98);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.7);
+        }
+
+        #back-btn {
+            background: linear-gradient(145deg, #4f5b66, #343a40);
+        }
+        
+        #back-btn:hover {
+             background: linear-gradient(145deg, #6c757d, #4f5b66);
+             transform: translateY(-5px) translateZ(30px) scale(1.05);
+             box-shadow: 0 8px 20px rgba(108, 117, 125, 0.4);
+        }
+
+    </style>
+</head>
+<body>
+    <div id="explorer-container">
+        <h1>Heroic Career Path Assembler <span style="font-size: 0.8em;">★</span></h1>
+        <div id="path-display">Your Mission Briefing Awaits</div>
+        <div id="details-box">
+            <h2>Welcome, Recruit!</h2>
+            <p>The world needs heroes in every field. Choose your specialization below to begin your journey and assemble your future. Your destiny awaits!</p>
+        </div>
+        <div id="options-container">
+        </div>
+    </div>
+
+    <script>
+        // --- Career Data (No changes needed here) ---
+        const careerData = {
+            'root': {
+                name: 'Start',
+                description: 'The world needs heroes in every field. Choose your specialization below to begin your journey and assemble your future. Your destiny awaits!',
+                children: ['stark_industries', 'shield_medbay', 'marvel_studios']
+            },
+            'stark_industries': {
+                name: 'Stark Industries (Tech)',
+                description: 'Innovate. Build. Protect. Join the world\'s leading tech conglomerate to engineer the future, from advanced robotics and AI to sustainable energy solutions. Proof that Tony Stark has a heart.',
+                children: ['weapons_dev', 'arc_reactor_power', 'data_analysis']
+            },
+            'shield_medbay': {
+                name: 'S.H.I.E.L.D. Med-Bay (Health)',
+                description: 'When heroes fall, you help them rise again. This division focuses on everything from emergency field medicine and genetic research to psychological support for agents.',
+                children: ['field_medic', 'super_soldier_serum_research', 'trauma_counseling']
+            },
+            'marvel_studios': {
+                name: 'Marvel Studios (Creative)',
+                description: 'Capture the stories of heroes for the world to see. This division is responsible for documenting heroic deeds through design, chronicles (writing), and immersive user experiences.',
+                children: ['mission_poster_design', 'hero_chronicles', 'holotable_interface_design']
+            },
+            'weapons_dev': {
+                name: 'Advanced Weaponry',
+                description: 'Design and build the next generation of non-lethal defensive and offensive gear for agents in the field. Think repulsor tech, energy shields, and advanced ballistics.',
+                children: []
+            },
+            'arc_reactor_power': {
+                name: 'Arc Reactor Division',
+                description: 'Focus on clean, limitless energy solutions for a better world. Manage arc reactor grids, research new applications, and ensure the power never goes out.',
+                children: []
+            },
+            'data_analysis': {
+                name: 'Strategic Data Analysis',
+                description: 'You are the digital eyes and ears. Analyze global threat data, predict enemy movements, and provide critical intel using Stark-level AI and algorithms.',
+                children: []
+            },
+            'field_medic': { name: 'Field Medic', description: 'Provide immediate, life-saving care to agents in active combat zones. You are the first line of defense against injury.', children: [] },
+            'super_soldier_serum_research': { name: 'Bio-Enhancement Research', description: 'Study the effects of the Super Soldier Serum and other genetic anomalies to unlock human potential and develop regenerative medicines.', children: [] },
+            'trauma_counseling': { name: 'Agent Psychological Support', description: 'Help heroes cope with the mental toll of saving the world. A strong mind is the most powerful weapon.', children: [] },
+            'mission_poster_design': { name: 'Propaganda & Design', description: 'Create inspiring visuals and posters that boost morale and showcase the triumphs of Earth\'s mightiest heroes. Every hero needs a good logo.', children: [] },
+            'hero_chronicles': { name: 'Hero Chronicles', description: 'Document the missions, battles, and personal stories of heroes. You are the historian of the modern age of marvels.', children: [] },
+            'holotable_interface_design': { name: 'Holo-Table UI/UX', description: 'Design the intuitive interfaces for S.H.I.E.L.D.\'s advanced holographic tables and heads-up displays, ensuring agents have seamless access to critical data.', children: [] }
+        };
+
+        // --- Application Logic (MODIFIED for new effects) ---
+        const pathDisplay = document.getElementById('path-display');
+        const detailsBox = document.getElementById('details-box');
+        const optionsContainer = document.getElementById('options-container');
+        const explorerContainer = document.getElementById('explorer-container'); // Get the main container
+        let pathHistory = ['root'];
+
+        function renderExplorer(nodeId) {
+            const currentNode = careerData[nodeId];
+
+            // NEW: Hide content before updating for a smooth transition
+            detailsBox.classList.add('content-hidden');
+            optionsContainer.classList.add('content-hidden');
+
+            // Update content after a short delay to allow the fade-out animation
+            setTimeout(() => {
+                detailsBox.innerHTML = `<h2>${currentNode.name}</h2><p>${currentNode.description}</p>`;
+                optionsContainer.innerHTML = ''; // Clear previous options
+
+                if (pathHistory.length > 1) {
+                    const backButton = document.createElement('button');
+                    backButton.id = 'back-btn';
+                    backButton.textContent = '← Fall Back';
+                    backButton.onclick = () => {
+                        pathHistory.pop();
+                        renderExplorer(pathHistory[pathHistory.length - 1]);
+                    };
+                    optionsContainer.appendChild(backButton);
+                }
+            
+                if (currentNode.children && currentNode.children.length > 0) {
+                    currentNode.children.forEach(childId => {
+                        const childNode = careerData[childId];
+                        const button = document.createElement('button');
+                        button.className = 'career-option';
+                        button.textContent = childNode.name;
+                        button.onclick = () => {
+                            pathHistory.push(childId);
+                            renderExplorer(childId);
+                        };
+                        optionsContainer.appendChild(button);
+                    });
+                }
+                
+                // NEW: Show the new content with a fade-in effect
+                detailsBox.classList.remove('content-hidden');
+                optionsContainer.classList.remove('content-hidden');
+
+                updatePathDisplay();
+            }, 400); // This duration should match the CSS transition time
+        }
+        
+        function updatePathDisplay() {
+            const pathNames = pathHistory.map(id => careerData[id].name);
+            pathDisplay.textContent = pathNames.slice(1).join(' → ') || 'Your Mission Briefing Awaits';
+        }
+        
+        // --- NEW: Interactive 3D Tilt Effect ---
+        explorerContainer.addEventListener('mousemove', (e) => {
+            const { left, top, width, height } = explorerContainer.getBoundingClientRect();
+            const x = e.clientX - left;
+            const y = e.clientY - top;
+
+            const rotateX = -1 * ((y - height / 2) / (height / 2)) * 8; // Max rotation 8 degrees
+            const rotateY = ((x - width / 2) / (width / 2)) * 8; // Max rotation 8 degrees
+
+            explorerContainer.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+        });
+
+        explorerContainer.addEventListener('mouseleave', () => {
+            explorerContainer.style.transform = 'rotateX(0deg) rotateY(0deg)'; // Reset on mouse leave
+        });
+
+
+        window.onload = () => {
+            renderExplorer('root');
+        };
+
+    </script>
+</body>
+</html>

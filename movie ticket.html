@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>S.H.I.E.L.D. Cinema Booking Terminal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --marvel-red: #ed1d24;
+            --stark-hud-blue: #00d9ff;
+            --dark-metal: #1a1d24;
+            --light-metal: #2a2d34;
+            --text-light: #e0e0e0;
+            --success-green: #00ff62;
+        }
+
+        /* --- 3D Parallax Background --- */
+        body {
+            background-color: #000;
+            color: var(--text-light);
+            font-family: 'Orbitron', sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .stars {
+            background-image: radial-gradient(1px 1px at 25px 5px, white, rgba(255, 255, 255, 0)), radial-gradient(1px 1px at 50px 25px, white, rgba(255, 255, 255, 0)), radial-gradient(1px 1px at 125px 70px, white, rgba(255, 255, 255, 0)), radial-gradient(1.5px 1.5px at 175px 50px, white, rgba(255, 255, 255, 0)), radial-gradient(2px 2px at 225px 15px, white, rgba(255, 255, 255, 0));
+            background-repeat: repeat;
+            background-size: 250px 250px;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            z-index: -1;
+        }
+        #stars1 { animation: move-stars 200s linear infinite; }
+        #stars2 { background-size: 500px 500px; animation: move-stars 150s linear infinite; opacity: 0.8; }
+        #stars3 { background-size: 750px 750px; animation: move-stars 100s linear infinite; opacity: 0.6; }
+        
+        @keyframes move-stars {
+            from { transform: translateY(0px); }
+            to { transform: translateY(-2000px); }
+        }
+
+        /* --- Global Styles --- */
+        .container {
+            width: 100%; max-width: 850px; background: rgba(26, 29, 36, 0.85); backdrop-filter: blur(10px);
+            border: 2px solid var(--stark-hud-blue); border-radius: 10px; box-shadow: 0 0 25px rgba(0, 217, 255, 0.4);
+            overflow: hidden; margin: auto; position: relative; z-index: 1;
+        }
+
+        header {
+            background: linear-gradient(45deg, var(--marvel-red), #a01217); color: white; padding: 15px 25px;
+            text-align: center; display: flex; justify-content: center; align-items: center; position: relative;
+            border-bottom: 2px solid var(--stark-hud-blue); text-shadow: 0 0 5px #fff;
+        }
+        
+        #backButton { position: absolute; left: 20px; background-color: rgba(0,0,0,0.2); font-size: 0.9em; display: none; }
+        #backButton:hover { background-color: rgba(0,0,0,0.4); }
+        header h1 { margin: 0; font-size: 1.8em; }
+        .page { padding: 25px; border-top: 1px solid #333; }
+        h2 { border-bottom: 2px solid var(--stark-hud-blue); padding-bottom: 10px; margin-top: 0; }
+
+        /* --- Filter Controls --- */
+        .filter-controls { display: flex; flex-direction: column; gap: 15px; margin-bottom: 25px; }
+        .filter-group { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+        .filter-group span { font-weight: bold; color: var(--stark-hud-blue); }
+        .filter-btn { background: var(--light-metal); border: 1px solid #555; font-size: 0.8em; padding: 8px 12px; }
+        .filter-btn.active { background: var(--stark-hud-blue); color: var(--dark-metal); border-color: var(--stark-hud-blue); box-shadow: 0 0 10px var(--stark-hud-blue); }
+
+        /* --- 3D Movie Card --- */
+        .movie-card {
+            background-color: var(--light-metal); border-radius: 8px; margin-bottom: 20px; display: flex;
+            gap: 20px; padding: 20px; border: 1px solid #444; transition: transform 0.4s, box-shadow 0.4s;
+            transform-style: preserve-3d; cursor: pointer;
+        }
+        .movie-card:hover { transform: perspective(1000px) rotateY(5deg) scale(1.02); box-shadow: 10px 10px 20px rgba(0,0,0,0.5); border-color: var(--stark-hud-blue); }
+        .movie-poster img { width: 120px; height: 180px; object-fit: cover; border-radius: 5px; background-color: #424242; transform: translateZ(20px); }
+        .movie-info { display: flex; flex-direction: column; transform: translateZ(15px); }
+        .movie-info h3 { margin: 0 0 10px 0; font-size: 1.5em; color: var(--stark-hud-blue); }
+        .movie-info .details{font-size:.9em;color:#b0b0b0;margin-bottom:15px}.movie-info .details span{margin-right:15px; background: #333; padding: 3px 6px; border-radius: 3px;}
+        .movie-info .synopsis{margin-bottom:20px;line-height:1.5;flex-grow:1}
+
+        /* --- Movie Details & Reviews Page --- */
+        #movie-details .details-layout { display: flex; gap: 25px; }
+        #movie-details .poster img { width: 200px; border-radius: 8px; box-shadow: 0 0 15px #000; }
+        #movie-details .info p { margin: 5px 0 15px; }
+        #movie-details .info strong { color: var(--stark-hud-blue); }
+        #movie-details .review-section { margin-top: 30px; }
+        .review-card { background: var(--light-metal); padding: 15px; border-left: 3px solid var(--stark-hud-blue); border-radius: 5px; margin-bottom: 15px; }
+        .review-card strong { color: #fff; }
+        .star-rating { color: #ffd900; font-size: 1.2em; }
+        
+        /* --- Buttons --- */
+        button {
+            background: linear-gradient(145deg, #555, #333); color: white; border: 1px solid var(--stark-hud-blue);
+            padding: 10px 15px; border-radius: 5px; cursor: pointer; font-size: 1em; font-weight: bold;
+            transition: all 0.2s; text-shadow: 0 0 3px #fff;
+        }
+        button:hover { background: var(--marvel-red); box-shadow: 0 0 15px var(--marvel-red); transform: scale(1.05); }
+        button:disabled { background: #444; border-color: #666; color: #888; cursor: not-allowed; transform: none; box-shadow: none;}
+        
+        /* --- Seat Selection --- */
+        .seat-layout-wrapper { overflow-x: auto; padding-bottom: 10px;}
+        .seat-layout { display: flex; flex-direction: column; align-items: center; gap: 10px; min-width: 550px; }
+        .seat-tier-label { width: 100%; text-align: center; color: var(--stark-hud-blue); padding: 5px; background: #222; margin-top: 10px;}
+        .seat-row { display: grid; grid-template-columns: 30px repeat(12, 1fr) 30px; gap: 5px; width: 100%; align-items: center; }
+        .seat {
+            width: 25px; height: 25px; border-radius: 5px; cursor: pointer;
+            transition: all .2s; position: relative; background-color: #616161; font-size: 10px;
+        }
+        .seat.RECLINER { width: 40px; }
+        .seat.selected { animation: glow 1.5s infinite alternate; }
+        @keyframes glow {
+            from { box-shadow: 0 0 5px var(--glow-color, var(--success-green)); background-color: var(--glow-color, var(--success-green)); }
+            to { box-shadow: 0 0 20px var(--glow-color, var(--success-green)); background-color: var(--glow-color, var(--success-green)); }
+        }
+        
+        /* Other Styles */
+        #loader{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);display:flex;justify-content:center;align-items:center;z-index:9999}.arc-reactor{width:150px;height:150px;border-radius:50%;border:5px solid #00d9ff;box-shadow:0 0 30px #00d9ff,inset 0 0 30px #00d9ff;position:relative;animation:spin 2s linear infinite}.arc-reactor::before{content:'';position:absolute;width:100%;height:100%;border-radius:50%;border:10px solid transparent;border-top-color:#fff;animation:spin 1.5s linear infinite reverse}@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}.showtime-buttons{display:flex;flex-wrap:wrap;gap:10px}.showtime-buttons button{background:linear-gradient(145deg, #424242, #2a2a2a);border:1px solid #616161}.showtime-buttons button:hover{background:var(--stark-hud-blue);border-color:var(--stark-hud-blue);box-shadow:0 0 15px var(--stark-hud-blue)}.seat-selection-area{display:flex;flex-direction:column;align-items:center;gap:20px}.screen-side{width:60%;background-color:#fff;color:#121212;text-align:center;padding:5px;border-radius:0 0 15px 15px;margin-bottom:20px;font-weight:bold;box-shadow:0 3px 10px rgba(0, 217, 255, 0.4)}.seat.gap{background-color:transparent;cursor:default}.seat.available:hover{background-color:#757575;transform:scale(1.1)}.seat.booked{background-color:#373737;cursor:not-allowed}.seat-legend{display:flex;gap:20px;justify-content:center;margin-top:15px; flex-wrap: wrap;}.legend-item{display:flex;align-items:center;gap:8px}.summary-bar{background-color:var(--light-metal);padding:15px;border-radius:8px;margin-top:20px;text-align:center;width:100%}.order-summary,.billing-summary{background-color:var(--light-metal);padding:15px;border-radius:8px;margin-bottom:20px}.order-summary p{margin:8px 0}#final-ticket{text-align:center}#qr-code{width:150px;height:150px;background-color:white;margin:20px auto;display:flex;align-items:center;justify-content:center;color:black;font-size:.8em;padding:10px;box-sizing:border-box;border:5px solid #fff}#ticket-details table{width:100%;text-align:left;border-collapse:collapse;margin-top:20px}#ticket-details td{padding:12px;border-bottom:1px solid #424242}#ticket-details td:first-child{font-weight:bold;width:30%}
+    
+        /* --- RESPONSIVENESS --- */
+        @media (max-width: 900px) {
+            body { padding: 0; }
+            .container { border-radius: 0; border-left: none; border-right: none; }
+            .page { padding: 15px; }
+        }
+
+        @media (max-width: 600px) {
+            header h1 { font-size: 1.4em; }
+            #backButton { font-size: 0.8em; left: 10px; }
+            h2 { font-size: 1.2em; }
+            .movie-card { flex-direction: column; }
+            .movie-poster img { margin: auto; }
+            #movie-details .details-layout { flex-direction: column; align-items: center; }
+            .seat { width: 20px; height: 20px; }
+            .seat.RECLINER { width: 30px; }
+            .seat-row { gap: 3px; grid-template-columns: 20px repeat(12, 1fr) 20px;}
+        }
+    </style>
+</head>
+<body>
+    <div id="loader"><div class="arc-reactor"></div></div>
+    <div class="stars" id="stars1"></div>
+    <div class="stars" id="stars2"></div>
+    <div class="stars" id="stars3"></div>
+    
+    <audio id="hover-sound" src="https://www.myinstants.com/media/sounds/blip-1.mp3" preload="auto"></audio>
+    <audio id="click-sound" src="https://www.myinstants.com/media/sounds/click-electronic.mp3" preload="auto"></audio>
+    <audio id="confirm-sound" src="https://www.myinstants.com/media/sounds/access-granted-8-bit.mp3" preload="auto"></audio>
+
+    <div class="container">
+        <header><button id="backButton" onclick="goBack()">← Back</button><h1>S.H.I.E.L.D. Terminal</h1></header>
+        
+        <div id="movie-selection" class="page">
+            <h2>Intel Database (Movies)</h2>
+            <div class="filter-controls">
+                <div class="filter-group" id="language-filters"></div>
+                <div class="filter-group" id="genre-filters"></div>
+            </div>
+            <div id="movie-list-container"></div>
+        </div>
+
+        <div id="movie-details" class="page" style="display:none">
+            <h2 id="details-title"></h2>
+            <div class="details-layout">
+                <div class="poster" id="details-poster"></div>
+                <div class="info">
+                    <p><strong>Status:</strong> <span id="details-status"></span></p>
+                    <p><strong>Director:</strong> <span id="details-director"></span></p>
+                    <p><strong>Cast:</strong> <span id="details-cast"></span></p>
+                    <p><strong>Synopsis:</strong> <span id="details-synopsis"></span></p>
+                    <button id="details-book-btn" onclick="proceedToShowtimes()">Book Tickets</button>
+                </div>
+            </div>
+            <div class="review-section">
+                <h3>Field Agent Reviews</h3>
+                <div id="details-reviews"></div>
+            </div>
+        </div>
+
+        <div id="showtime-selection" class="page" style="display:none"><h2>Select Deployment Time</h2><div id="showtime-container"></div></div>
+        
+        <div id="seat-selection" class="page" style="display:none">
+            <h2>Assign Your Seat(s)</h2>
+            <p style="text-align:center;margin-top:-10px;margin-bottom:20px" id="seat-show-details"></p>
+            <div class="seat-selection-area">
+                <div class="screen-side">BATTLEFIELD</div>
+                <div class="seat-layout-wrapper">
+                    <div class="seat-layout" id="seat-layout-container"></div>
+                </div>
+                <div class="seat-legend">
+                    <div class="legend-item"><div class="seat available"></div><span>Available</span></div>
+                    <div class="legend-item"><div class="seat booked"></div><span>Occupied</span></div>
+                    <div class="legend-item"><div class="seat selected"></div><span>Your Seat</span></div>
+                </div>
+            </div>
+            <div class="summary-bar">
+                <p>Selected Seats: <span id="selected-seats-info">None</span></p>
+                <p>Total Cost: ₹<span id="total-price-info">0.00</span></p>
+            </div>
+            <button class="primary-action" onclick="proceedToPayment()">Confirm Assignment</button>
+        </div>
+        
+        <div id="payment" class="page" style="display:none"><h2>Finalize Requisition</h2><div class="order-summary"><p><strong>Mission:</strong> <span id="summary-movie"></span></p><p><strong>Location:</strong> <span id="summary-cinema"></span></p><p><strong>Time:</strong> <span id="summary-time"></span></p><p><strong>Seats:</strong> <span id="summary-seats"></span></p></div><div class="billing-summary"><p>Ticket Cost: ₹<span id="summary-ticket-price"></span></p><p>Service Fee: ₹<span id="summary-booking-fee"></span></p><hr style="border-color:#424242"><p><strong>Total Amount: ₹<span id="summary-total"></span></strong></p></div><button class="primary-action" onclick="confirmPayment()">DEPLOY PAYMENT</button></div>
+        
+        <div id="confirmation" class="page" style="display:none"><div id="final-ticket"><h2>Mission Confirmed!</h2><p>Your S.H.I.E.L.D. e-Ticket is authorized.</p><div id="qr-code">[ Scannable ID Code ]</div><div id="ticket-details"><table><tr><td>Movie</td><td id="ticket-movie"></td></tr><tr><td>Cinema</td><td id="ticket-cinema"></td></tr><tr><td>Date & Time</td><td id="ticket-time"></td></tr><tr><td>Seats</td><td id="ticket-seats"></td></tr><tr><td>Total Paid</td><td id="ticket-amount"></td></tr><tr><td>Booking ID</td><td id="ticket-booking-id"></td></tr></table></div></div></div>
+    </div>
+
+    <script>
+        // --- SOUND EFFECTS ---
+        const hoverSound = document.getElementById('hover-sound');
+        const clickSound = document.getElementById('click-sound');
+        const confirmSound = document.getElementById('confirm-sound');
+        
+        function playSound(sound) {
+            sound.currentTime = 0;
+            sound.play().catch(e => {});
+        }
+
+        document.body.addEventListener('mouseover', (e) => {
+            if (e.target.matches('button, .seat.available, .movie-card')) {
+                playSound(hoverSound);
+            }
+        });
+
+        // --- DATABASE ---
+        const movieDatabase = [
+            { id: 1, title: "The Avengers", status: "Now Showing", language: "Hollywood", genre: ["Action", "Sci-Fi"], director: "Joss Whedon", cast: "Robert Downey Jr., Chris Evans", synopsis: "Earth's mightiest heroes must come together to stop Loki and his alien army.", imageUrl: "https://placehold.co/120x180/B22222/FFFFFF?text=Avengers", reviews: [{user:"Nick Fury", rating:5, comment:"They get the job done. Mostly."}] },
+            { id: 2, title: "K.G.F: Chapter 2", status: "Now Showing", language: "Sandalwood", genre: ["Action", "Drama"], director: "Prashanth Neel", cast: "Yash, Sanjay Dutt", synopsis: "In Kolar Gold Fields, Rocky's name strikes fear. The government sees him as a threat.", imageUrl: "https://placehold.co/120x180/DAA520/000000?text=KGF+2", reviews: [{user:"Rocky Bhai", rating:5, comment:"Violence! Violence! Violence!"}] },
+            { id: 3, title: "Vikram", status: "Now Showing", language: "Kollywood", genre: ["Action", "Thriller"], director: "Lokesh Kanagaraj", cast: "Kamal Haasan, Vijay Sethupathi", synopsis: "A special agent investigates a murder by a masked group of serial killers.", imageUrl: "https://placehold.co/120x180/000000/FFFFFF?text=Vikram", reviews: [{user:"Agent Vikram", rating:5, comment:"The eagle has landed."}] },
+            { id: 7, title: "Jawan", status: "Now Showing", language: "Bollywood", genre: ["Action", "Thriller"], director: "Atlee", cast: "Shah Rukh Khan, Nayanthara", synopsis: "A man is driven by a personal vendetta to rectify the wrongs in society, while keeping a promise made years ago.", imageUrl: "https://placehold.co/120x180/800000/FFFFFF?text=Jawan", reviews: [{user:"A Fan", rating:5, comment:"SRK is back with a bang!"}] },
+            { id: 8, title: "RRR", status: "Now Showing", language: "Tollywood", genre: ["Action", "Drama"], director: "S. S. Rajamouli", cast: "N. T. Rama Rao Jr., Ram Charan", synopsis: "A fictitious story about two legendary revolutionaries and their journey away from home before they started fighting for their country in the 1920s.", imageUrl: "https://placehold.co/120x180/FF4500/FFFFFF?text=RRR", reviews: [{user:"A Critic", rating:5, comment:"An epic cinematic experience."}] },
+            { id: 4, title: "Inception", status: "Now Showing", language: "Hollywood", genre: ["Sci-Fi", "Thriller"], director: "Christopher Nolan", cast: "Leonardo DiCaprio", synopsis: "A thief who steals corporate secrets through dream-sharing is given the inverse task of planting an idea.", imageUrl: "https://placehold.co/120x180/2F4F4F/FFFFFF?text=Inception", reviews: [{user:"Cobb", rating:4, comment:"It was a bit confusing, even for me."}] },
+            { id: 9, title: "Kalki 2898-AD", status: "Upcoming", language: "Tollywood", genre: ["Sci-Fi", "Action"], director: "Nag Ashwin", cast: "Prabhas, Deepika Padukone", synopsis: "A modern-day avatar of Vishnu, a Hindu god, who is believed to have descended to earth to protect the world from evil forces.", imageUrl: "https://placehold.co/120x180/4682B4/FFFFFF?text=Kalki", reviews: [{user:"Previewer", rating:5, comment:"Looks promising!"}] },
+            { id: 5, title: "Kantara", status: "Now Showing", language: "Sandalwood", genre: ["Action", "Drama", "Fantasy"], director: "Rishab Shetty", cast: "Rishab Shetty, Sapthami Gowda", synopsis: "A human and nature conflict where Shiva is the rebel who works against nature.", imageUrl: "https://placehold.co/120x180/8B4513/FFFFFF?text=Kantara", reviews: [{user:"A Villager", rating:5, comment:"Truly divine experience."}] },
+            { id: 6, title: "Master", status: "Now Showing", language: "Kollywood", genre: ["Action", "Thriller"], director: "Lokesh Kanagaraj", cast: "Vijay, Vijay Sethupathi", synopsis: "An alcoholic professor clashes with a gangster who uses school children for criminal activities.", imageUrl: "https://placehold.co/120x180/FF8C00/000000?text=Master", reviews: [{user:"JD", rating:4, comment:"Had to sober up for this one."}] },
+        ];
+        const seatPrices = { RECLINER: 500, PRIME: 350, CLASSIC: 220 };
+        const pages=["movie-selection","movie-details","showtime-selection","seat-selection","payment","confirmation"];
+        const booking={movie:null,cinema:"",time:"",seats:[],totalPrice:0};
+        let pageHistory=[];
+        let currentFilters = { language: "All", genre: "All" };
+
+        // --- NAVIGATION & CORE LOGIC ---
+        function showPage(pageId, isBack = false) {
+            const currentPage = pages.find(p => document.getElementById(p).style.display === 'block');
+            if (currentPage && currentPage !== pageId && !isBack) {
+                pageHistory.push(currentPage);
+            }
+            pages.forEach(id => {
+                document.getElementById(id).style.display = (id === pageId) ? 'block' : 'none';
+            });
+            document.getElementById('backButton').style.display = pageHistory.length > 0 ? 'inline-block' : 'none';
+            window.scrollTo(0, 0);
+        }
+
+        window.goBack = function() {
+            playSound(clickSound);
+            if (pageHistory.length > 0) {
+                showPage(pageHistory.pop(), true);
+            }
+        };
+
+        function setFilter(type, value) {
+            playSound(clickSound);
+            currentFilters[type] = value;
+            renderFilters();
+            renderMovies();
+        }
+
+        function renderFilters() {
+            const languages = ["All", ...new Set(movieDatabase.map(m => m.language))];
+            const genres = ["All", ...new Set(movieDatabase.flatMap(m => m.genre))];
+            
+            document.getElementById('language-filters').innerHTML = '<span>Language:</span>' + languages.map(l => `<button class="filter-btn ${currentFilters.language === l ? 'active' : ''}" onclick="setFilter('language', '${l}')">${l}</button>`).join('');
+            document.getElementById('genre-filters').innerHTML = '<span>Genre:</span>' + genres.map(g => `<button class="filter-btn ${currentFilters.genre === g ? 'active' : ''}" onclick="setFilter('genre', '${g}')">${g}</button>`).join('');
+        }
+
+        function renderMovies() {
+            const container = document.getElementById("movie-list-container");
+            const filteredMovies = movieDatabase.filter(m => 
+                (currentFilters.language === 'All' || m.language === currentFilters.language) &&
+                (currentFilters.genre === 'All' || m.genre.includes(currentFilters.genre))
+            );
+
+            container.innerHTML = filteredMovies.length === 0 ? `<p>No movies match the selected filters.</p>` : filteredMovies.map(movie => `
+                <div class="movie-card" onclick="showMovieDetails(${movie.id})">
+                    <div class="movie-poster"><img src="${movie.imageUrl}" alt="${movie.title}"></div>
+                    <div class="movie-info">
+                        <h3>${movie.title}</h3>
+                        <p class="details"><span>${movie.language}</span><span>${movie.genre.join(' / ')}</span></p>
+                        <p class="synopsis">${movie.synopsis}</p>
+                    </div>
+                </div>`).join('');
+        }
+
+        window.showMovieDetails = function(movieId) {
+            playSound(clickSound);
+            booking.movie = movieDatabase.find(m => m.id === movieId);
+            
+            document.getElementById('details-title').innerText = booking.movie.title;
+            document.getElementById('details-poster').innerHTML = `<img src="${booking.movie.imageUrl}" alt="${booking.movie.title}">`;
+            document.getElementById('details-director').innerText = booking.movie.director;
+            document.getElementById('details-cast').innerText = booking.movie.cast;
+            document.getElementById('details-synopsis').innerText = booking.movie.synopsis;
+            document.getElementById('details-status').innerText = booking.movie.status;
+            
+            const bookBtn = document.getElementById('details-book-btn');
+            bookBtn.disabled = booking.movie.status === 'Upcoming';
+            
+            document.getElementById('details-reviews').innerHTML = booking.movie.reviews.map(r => `
+                <div class="review-card">
+                    <p><strong>${r.user}</strong> <span class="star-rating">${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</span></p>
+                    <p>${r.comment}</p>
+                </div>`).join('');
+            
+            showPage('movie-details');
+        };
+        
+        window.proceedToShowtimes = function() {
+            playSound(clickSound);
+            renderShowtimes();
+            showPage('showtime-selection');
+        };
+
+        function renderShowtimes() {
+            document.getElementById("showtime-container").innerHTML = `
+                <div><h3>S.H.I.E.L.D. Plex, Coimbatore</h3><div class="showtime-buttons"><button onclick="selectShowtime('10:00 AM', 'S.H.I.E.L.D. Plex, Coimbatore')">10:00 HRS</button><button onclick="selectShowtime('04:30 PM', 'S.H.I.E.L.D. Plex, Coimbatore')">16:30 HRS</button></div></div>
+                <div><h3>Avengers Tower Cinema</h3><div class="showtime-buttons"><button onclick="selectShowtime('10:30 AM', 'Avengers Tower Cinema')">10:30 HRS</button><button onclick="selectShowtime('05:00 PM', 'Avengers Tower Cinema')">17:00 HRS</button></div></div>`;
+        }
+
+        window.selectShowtime = function(time, cinema) {
+            playSound(clickSound);
+            booking.time = time; booking.cinema = cinema;
+            document.getElementById("seat-show-details").innerText = `${cinema} | ${time}`;
+            generateSeats();
+            showPage("seat-selection");
+        };
+
+        function generateSeats() {
+            const container = document.getElementById("seat-layout-container");
+            container.innerHTML = ""; booking.seats = []; updateSummary();
+
+            const createRow = (rowCount, seatCount, tier, prefix) => {
+                for (let r=1; r<=rowCount; r++) {
+                    let rowHtml = `<div class="seat-row"><div class="row-label">${prefix}${r}</div>`;
+                    for (let i=1; i<=seatCount; i++) {
+                        const booked = Math.random() > 0.7 ? 'booked' : 'available';
+                        rowHtml += `<div class="seat ${tier} ${booked}" data-tier="${tier}" data-seat-id="${prefix}${r}-${i}">${i}</div>`;
+                    }
+                    rowHtml += `<div class="row-label">${prefix}${r}</div></div>`;
+                    container.innerHTML += rowHtml;
+                }
+            };
+            
+            container.innerHTML += `<div class="seat-tier-label">RECLINER - ₹${seatPrices.RECLINER}</div>`;
+            createRow(2, 10, 'RECLINER', 'R');
+            container.innerHTML += `<div class="seat-tier-label">PRIME - ₹${seatPrices.PRIME}</div>`;
+            createRow(4, 12, 'PRIME', 'P');
+            container.innerHTML += `<div class="seat-tier-label">CLASSIC - ₹${seatPrices.CLASSIC}</div>`;
+            createRow(4, 12, 'CLASSIC', 'C');
+        }
+
+        document.getElementById("seat-layout-container").addEventListener("click", (e) => {
+            const target = e.target;
+            if (target.classList.contains("available")) {
+                playSound(clickSound);
+                target.classList.replace("available", "selected");
+                booking.seats.push({ id: target.dataset.seatId, tier: target.dataset.tier });
+            } else if (target.classList.contains("selected")) {
+                playSound(clickSound);
+                target.classList.replace("selected", "available");
+                booking.seats = booking.seats.filter(seat => seat.id !== target.dataset.seatId);
+            }
+            updateSummary();
+        });
+
+        function updateSummary() {
+            booking.totalPrice = booking.seats.reduce((total, seat) => total + seatPrices[seat.tier], 0);
+            const seatIds = booking.seats.map(s => s.id).sort();
+            
+            document.getElementById("selected-seats-info").innerText = seatIds.length > 0 ? seatIds.join(', ') : "None";
+            document.getElementById("total-price-info").innerText = booking.totalPrice.toFixed(2);
+        }
+
+        window.proceedToPayment = function() {
+            if (booking.seats.length === 0) return alert("No seats assigned!");
+            playSound(confirmSound);
+            
+            const total = booking.totalPrice + 50;
+            document.getElementById("summary-movie").innerText = booking.movie.title;
+            document.getElementById("summary-cinema").innerText = booking.cinema;
+            document.getElementById("summary-time").innerText = booking.time;
+            document.getElementById("summary-seats").innerText = booking.seats.map(s => s.id).join(', ');
+            document.getElementById("summary-ticket-price").innerText = booking.totalPrice.toFixed(2);
+            document.getElementById("summary-booking-fee").innerText = (50).toFixed(2);
+            document.getElementById("summary-total").innerText = total.toFixed(2);
+            showPage("payment");
+        };
+
+        window.confirmPayment = function() {
+            playSound(confirmSound);
+            const total = booking.totalPrice + 50;
+            document.getElementById("ticket-movie").innerText = booking.movie.title;
+            document.getElementById("ticket-cinema").innerText = booking.cinema;
+            document.getElementById("ticket-time").innerText = booking.time;
+            document.getElementById("ticket-seats").innerText = booking.seats.map(s => s.id).join(', ');
+            document.getElementById("ticket-amount").innerText = `₹${total.toFixed(2)}`;
+            document.getElementById("ticket-booking-id").innerText = `SHIELD-${Math.random().toString(16).substr(2, 8).toUpperCase()}`;
+            showPage("confirmation");
+        };
+        
+        // --- INITIALIZE APP ---
+        document.addEventListener('DOMContentLoaded', () => {
+            renderFilters();
+            renderMovies();
+            showPage('movie-selection');
+            setTimeout(() => {
+                document.getElementById('loader').style.display = 'none';
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

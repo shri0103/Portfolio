@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Avengers Initiative Mission Hub</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* CSS Styling - Avengers Initiative Theme */
+        @import url('https://fonts.googleapis.com/css2?family=Exo+2:wght@400;500;600;700&display=swap');
+
+        :root {
+            --bg-dark: #101827;
+            --container-bg: rgba(10, 25, 47, 0.85);
+            --primary-glow: rgba(0, 191, 255, 0.6);
+            --primary-color: #00BFFF; /* Arc Reactor Blue */
+            --primary-hover: #60DFFF;
+            --text-light: #E2E8F0;
+            --text-muted: #A0AEC0;
+            --border-color: rgba(0, 191, 255, 0.2);
+            
+            /* Threat Levels (Priorities) */
+            --critical-threat: #F56565; /* Code Red */
+            --critical-glow: rgba(245, 101, 101, 0.4); /* Glow for critical alerts */
+            --elevated-threat: #ED8936; /* Orange Alert */
+            --standard-threat: #4299E1; /* S.H.I.E.L.D. Blue */
+        }
+
+        /* --- Animations --- */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes fadeOut {
+            to { opacity: 0; transform: scale(0.9); }
+        }
+        
+        @keyframes showAchievement {
+            0% { transform: translate(-50%, -50%) scale(0) rotateY(-90deg); opacity: 0; }
+            50% { transform: translate(-50%, -50%) scale(1.5) rotateY(15deg); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(1.2) rotateY(0deg); opacity: 0; }
+        }
+
+        @keyframes mildBlink {
+            0%, 100% { box-shadow: inset 0 0 0 0 transparent; }
+            50% { box-shadow: inset 0 0 150px 70px var(--critical-glow); }
+        }
+
+        body {
+            font-family: 'Exo 2', sans-serif;
+            background: radial-gradient(circle, #2c3e50, var(--bg-dark));
+            background-attachment: fixed;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            color: var(--text-light);
+            transition: background 0.7s ease-in-out, box-shadow 0.5s ease-in-out; 
+        }
+
+        /* MODIFIED: Spider-Man & Hulk themed alert for expired critical tasks */
+        body.spiderman-alert-mode {
+            background-color: #d10000; /* Fallback Red */
+            background-image:
+                linear-gradient(rgba(0, 82, 155, 0.6), rgba(0, 82, 155, 0.6)), /* Blue tint overlay */
+                linear-gradient(90deg, rgba(20,20,20,.15) 1px, transparent 1px), /* Vertical web lines */
+                linear-gradient(rgba(20,20,20,.15) 1px, transparent 1px), /* Horizontal web lines */
+                radial-gradient(ellipse at bottom, #00529B 0%, #D10000 50%, #2E6B3B 100%); /* Blue, Red, and Green base */
+            background-size: 100%, 15px 15px, 15px 15px, 100%;
+        }
+
+        body.temporary-alert-blink {
+            animation: mildBlink 1s ease-in-out infinite;
+        }
+
+        .container {
+            background: var(--container-bg);
+            padding: 40px;
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 0 25px var(--primary-glow), inset 0 0 10px rgba(0,191,255,0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            width: 100%;
+            max-width: 700px;
+            animation: fadeInUp 0.6s ease-out;
+            z-index: 10;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-weight: 700;
+            font-size: 2.5rem;
+            color: var(--primary-color);
+            text-shadow: 0 0 10px var(--primary-glow);
+            letter-spacing: 1px;
+        }
+
+        h1 i {
+            margin-right: 15px;
+            animation: spin 8s linear infinite;
+        }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+        .input-area {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+
+        #taskInput {
+            flex-grow: 1; padding: 14px 18px; border: 1px solid var(--border-color);
+            border-radius: 8px; font-size: 1rem; background-color: rgba(0,0,0,0.3);
+            color: var(--text-light); transition: all 0.3s ease;
+        }
+
+        #taskInput::placeholder { color: var(--text-muted); }
+        #taskInput:focus {
+            outline: none; border-color: var(--primary-color);
+            box-shadow: 0 0 10px var(--primary-glow);
+        }
+
+        #addTaskBtn {
+            background-color: transparent; color: var(--primary-color);
+            border: 2px solid var(--primary-color); padding: 14px 24px; border-radius: 8px;
+            cursor: pointer; font-size: 1rem; font-weight: 600;
+            text-transform: uppercase; transition: all 0.3s ease;
+        }
+
+        #addTaskBtn:hover {
+            background-color: var(--primary-color); color: var(--bg-dark);
+            box-shadow: 0 0 15px var(--primary-glow);
+        }
+
+        .filters {
+            display: flex; justify-content: center; gap: 10px;
+            margin-bottom: 25px; border-bottom: 1px solid var(--border-color); padding-bottom: 20px;
+        }
+
+        .filter-btn {
+            background: transparent; color: var(--text-muted); border: 1px solid transparent;
+            padding: 8px 16px; border-radius: 6px; cursor: pointer;
+            font-weight: 500; transition: all 0.3s ease;
+        }
+        
+        .filter-btn:hover { color: var(--primary-hover); border-color: var(--border-color); }
+        .filter-btn.active { background: var(--primary-color); color: var(--bg-dark); font-weight: 700; }
+
+        #taskList { list-style: none; padding: 0; margin: 0; }
+
+        #taskList li {
+            background: rgba(0,0,0,0.2); padding: 18px 20px; border-radius: 8px;
+            margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between;
+            border: 1px solid var(--border-color); border-left-width: 6px; word-break: break-word;
+            transition: all 0.3s ease; animation: fadeInUp 0.4s ease-out;
+            position: relative; overflow: hidden;
+        }
+
+        #taskList li.critical { border-left-color: var(--critical-threat); }
+        #taskList li.elevated { border-left-color: var(--elevated-threat); }
+        #taskList li.standard { border-left-color: var(--standard-threat); }
+
+        #taskList li:hover {
+             background: rgba(0, 191, 255, 0.1); border-color: var(--primary-color);
+             box-shadow: 0 0 10px var(--primary-glow);
+        }
+
+        #taskList li.completed { opacity: 0.5; background: transparent; }
+        #taskList li.completed .task-text { text-decoration: line-through; }
+        #taskList li .task-text { font-weight: 500; flex-grow: 1; }
+
+        .task-content { display: flex; align-items: center; width: 100%; }
+        .task-timer {
+            font-size: 0.9rem; font-weight: 600; margin-left: 15px;
+            padding: 4px 10px; border-radius: 5px; background-color: rgba(255,255,255,0.1);
+            color: var(--primary-hover); transition: all 0.3s ease;
+        }
+        .task-timer.low-time { color: var(--elevated-threat); }
+        .task-timer.expired { color: var(--critical-threat); background-color: rgba(245, 101, 101, 0.2); }
+
+        #taskList li .priority-tag {
+            font-size: 0.75rem; font-weight: 700; padding: 5px 12px; border-radius: 20px;
+            color: var(--bg-dark); flex-shrink: 0; text-transform: uppercase;
+            letter-spacing: 0.5px; margin-left: 15px;
+        }
+
+        .priority-tag.critical { background-color: var(--critical-threat); }
+        .priority-tag.elevated { background-color: var(--elevated-threat); }
+        .priority-tag.standard { background-color: var(--standard-threat); }
+
+        #taskList li .actions { display: flex; align-items: center; flex-shrink: 0; }
+        #taskList li .actions button {
+            background: none; border: none; color: var(--text-muted);
+            cursor: pointer; font-size: 1.1rem; margin-left: 12px;
+            padding: 5px; transition: all 0.2s ease;
+        }
+
+        #taskList li .actions button:hover { transform: scale(1.3); }
+        #taskList li .actions .complete-btn:hover { color: #38A169; }
+        #taskList li .actions .delete-btn:hover { color: var(--critical-threat); }
+        
+        li.no-tasks {
+            border: 2px dashed var(--border-color); color: var(--text-muted);
+            text-align: center; justify-content: center; font-style: italic;
+            background: transparent; box-shadow: none;
+        }
+
+        li.task-exit { animation: fadeOut 0.3s ease-out forwards; }
+        
+        .achievement-popup {
+            position: absolute; top: 50%; left: 50%; font-size: 3.5rem;
+            color: #FFD700; text-shadow: 2px 2px 8px rgba(0,0,0,0.6), 0 0 15px #FFF700;
+            z-index: 100; pointer-events: none; animation: showAchievement 2s ease-out forwards;
+        }
+        .achievement-popup i { transform: perspective(100px) rotateY(-5deg); display: inline-block; }
+
+        @media (max-width: 480px) {
+            body { padding: 10px; } .container { padding: 25px; } h1 { font-size: 1.8rem; }
+            .input-area { flex-direction: column; } #addTaskBtn { width: 100%; }
+            #taskList li { flex-direction: column; align-items: flex-start; gap: 15px; }
+            .task-content { flex-direction: column; align-items: flex-start; gap: 10px; }
+            .task-timer { margin-left: 0; }
+            #taskList li .actions { width: 100%; text-align: right; justify-content: flex-end; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1><i class="fa-solid fa-atom"></i> Avengers Initiative Mission Hub</h1>
+        <div class="input-area">
+            <input type="text" id="taskInput" placeholder="Critical task... @5m for timer, #10s for blink">
+            <button id="addTaskBtn">Log Mission</button>
+        </div>
+        <div class="filters">
+            <button class="filter-btn active" data-filter="all">All</button>
+            <button class="filter-btn" data-filter="critical">Critical</button>
+            <button class="filter-btn" data-filter="elevated">Elevated</button>
+            <button class="filter-btn" data-filter="standard">Standard</button>
+        </div>
+        <ul id="taskList">
+        </ul>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const taskInput = document.getElementById('taskInput');
+            const addTaskBtn = document.getElementById('addTaskBtn');
+            const taskList = document.getElementById('taskList');
+            const filterBtns = document.querySelectorAll('.filter-btn');
+
+            let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+            let isTemporaryAlertActive = false;
+            let temporaryAlertTimeout;
+            
+            const getAIPriority = (taskText) => {
+                const text = taskText.toLowerCase();
+                if (/\b(urgent|asap|important|critical|deadline|defend|invasion)\b/.test(text)) return 'critical';
+                if (/\b(soon|plan|review|schedule|investigate)\b/.test(text)) return 'elevated';
+                return 'standard';
+            };
+
+            const saveTasks = () => {
+                localStorage.setItem('tasks', JSON.stringify(tasks));
+            };
+
+            const renderTasks = (filter = 'all') => {
+                taskList.innerHTML = '';
+                const filteredTasks = tasks.filter(task => filter === 'all' || task.priority === filter);
+
+                if (filteredTasks.length === 0) {
+                    taskList.innerHTML = '<li class="no-tasks">All threats neutralized. Mission board is clear.</li>';
+                    return;
+                }
+
+                filteredTasks.forEach(task => {
+                    const li = document.createElement('li');
+                    li.className = `${task.priority} ${task.completed ? 'completed' : ''}`;
+                    li.dataset.id = task.id;
+                    const priorityText = task.priority.charAt(0).toUpperCase() + task.priority.slice(1);
+
+                    let timerHTML = '';
+                    if (task.priority === 'critical' && !task.completed && task.timerExpiresAt) {
+                         timerHTML = `<span class="task-timer" data-expires="${task.timerExpiresAt}"></span>`;
+                    }
+
+                    li.innerHTML = `
+                        <div class="task-content">
+                            <span class="task-text">${task.text}</span>
+                            ${timerHTML}
+                        </div>
+                        <div class="actions">
+                            <span class="priority-tag ${task.priority}">${priorityText}</span>
+                            <button class="complete-btn" title="Mission Complete"><i class="fa-solid fa-check"></i></button>
+                            <button class="delete-btn" title="Abort Mission"><i class="fa-solid fa-trash"></i></button>
+                        </div>
+                    `;
+                    taskList.appendChild(li);
+                });
+            };
+            
+            const addTask = () => {
+                let text = taskInput.value.trim();
+                if (text === '') return;
+
+                const newTask = {
+                    id: Date.now(),
+                    text: text,
+                    priority: getAIPriority(text),
+                    completed: false,
+                };
+
+                if (newTask.priority === 'critical') {
+                    let blinkDuration = 5000; // Default blink is 5 seconds
+
+                    // Parse for custom blink time, e.g., #10s
+                    const blinkRegex = /#(\d+)s\b/;
+                    const blinkMatch = text.match(blinkRegex);
+                    if (blinkMatch) {
+                        blinkDuration = parseInt(blinkMatch[1], 10) * 1000;
+                        text = text.replace(blinkRegex, '').trim(); // Clean the text
+                    }
+
+                    // Start the temporary alert with the determined duration
+                    isTemporaryAlertActive = true;
+                    document.body.classList.add('temporary-alert-blink');
+                    clearTimeout(temporaryAlertTimeout); 
+                    temporaryAlertTimeout = setTimeout(() => {
+                        isTemporaryAlertActive = false;
+                        document.body.classList.remove('temporary-alert-blink');
+                        updateTimersAndAlerts(); 
+                    }, blinkDuration);
+
+                    // Parse for a user-set mission timer, e.g., @5m
+                    const timerRegex = /@(\d+)([ms])\b/; 
+                    const timerMatch = text.match(timerRegex);
+                    if (timerMatch) {
+                        const value = parseInt(timerMatch[1], 10);
+                        const unit = timerMatch[2];
+                        let durationInMs = 0;
+                        if (unit === 'm') durationInMs = value * 60 * 1000;
+                        else if (unit === 's') durationInMs = value * 1000;
+
+                        if (durationInMs > 0) {
+                           newTask.timerExpiresAt = Date.now() + durationInMs;
+                           text = text.replace(timerRegex, '').trim();
+                        }
+                    }
+                }
+                
+                newTask.text = text;
+                tasks.unshift(newTask);
+                saveTasks();
+                renderTasks(document.querySelector('.filter-btn.active').dataset.filter);
+                taskInput.value = '';
+                taskInput.focus();
+            };
+            
+            const updateTimersAndAlerts = () => {
+                document.querySelectorAll('.task-timer').forEach(timerEl => {
+                    const expiresAt = Number(timerEl.dataset.expires);
+                    const remaining = expiresAt - Date.now();
+                    
+                    timerEl.classList.remove('low-time', 'expired');
+
+                    if (remaining > 0) {
+                        const minutes = Math.floor((remaining / 1000 / 60) % 60).toString().padStart(2, '0');
+                        const seconds = Math.floor((remaining / 1000) % 60).toString().padStart(2, '0');
+                        timerEl.textContent = `${minutes}:${seconds}`;
+                        if (remaining < 10000) {
+                            timerEl.classList.add('low-time');
+                        }
+                    } else {
+                        timerEl.textContent = 'EXPIRED';
+                        timerEl.classList.add('expired');
+                    }
+                });
+
+                const hasExpiredTask = tasks.some(task => 
+                    task.priority === 'critical' && 
+                    !task.completed && 
+                    task.timerExpiresAt && 
+                    task.timerExpiresAt < Date.now()
+                );
+
+                if (hasExpiredTask || isTemporaryAlertActive) {
+                    document.body.classList.add('spiderman-alert-mode');
+                } else {
+                    document.body.classList.remove('spiderman-alert-mode');
+                }
+            };
+
+            const handleTaskListClick = (e) => {
+                const target = e.target.closest('button');
+                if (!target) return;
+                
+                const li = target.closest('li');
+                const taskId = Number(li.dataset.id);
+
+                if (target.classList.contains('complete-btn')) {
+                    const task = tasks.find(t => t.id === taskId);
+                    if (!task) return;
+
+                    if (!task.completed) {
+                        task.completed = true;
+                        const achievement = document.createElement('div');
+                        achievement.className = 'achievement-popup';
+                        achievement.innerHTML = '<i class="fa-solid fa-trophy"></i>';
+                        li.appendChild(achievement);
+                        li.style.pointerEvents = 'none';
+                        setTimeout(() => {
+                            saveTasks();
+                            renderTasks(document.querySelector('.filter-btn.active').dataset.filter);
+                        }, 2000); 
+                    } else {
+                        task.completed = false;
+                        saveTasks();
+                        renderTasks(document.querySelector('.filter-btn.active').dataset.filter);
+                    }
+                }
+
+                if (target.classList.contains('delete-btn')) {
+                    li.classList.add('task-exit');
+                    setTimeout(() => {
+                        tasks = tasks.filter(t => t.id !== taskId);
+                        saveTasks();
+                        renderTasks(document.querySelector('.filter-btn.active').dataset.filter);
+                    }, 300);
+                }
+            };
+
+            const handleFilterClick = (e) => {
+                if (!e.target.classList.contains('filter-btn')) return;
+                filterBtns.forEach(btn => btn.classList.remove('active'));
+                e.target.classList.add('active');
+                renderTasks(e.target.dataset.filter);
+            };
+
+            addTaskBtn.addEventListener('click', addTask);
+            taskInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') addTask(); });
+            taskList.addEventListener('click', handleTaskListClick);
+            document.querySelector('.filters').addEventListener('click', handleFilterClick);
+            
+            renderTasks();
+            setInterval(updateTimersAndAlerts, 1000);
+        });
+    </script>
+</body>
+</html>
